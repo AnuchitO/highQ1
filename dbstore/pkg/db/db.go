@@ -15,8 +15,8 @@ import (
 // DB type
 type DB struct {
 	filename  string
-	fileWrite *os.File
-	fileRead  *os.File
+	fileWrite io.WriteSeeker
+	fileRead  io.ReadSeeker
 	offsetMap map[string]int64
 }
 
