@@ -165,9 +165,3 @@ func (db *DB) readPbData(lengthOf uint64) (*pb.Entity, error) {
 	}
 	return entity, nil
 }
-
-// NewDb return a new intialized Db
-func NewDb(filename string) *DB {
-	db := &DB{}
-	return db
-}
