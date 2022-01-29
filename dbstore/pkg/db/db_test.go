@@ -1,33 +1,23 @@
 package db
 
 import (
-	"io/ioutil"
-	"os"
+	"io"
 	"reflect"
 	"testing"
+
+	"github.com/mattetti/filebuffer"
 
 	"github.com/anuchito/dbstore/pb"
 )
 
-func setupFile(t *testing.T) (*os.File, func()) {
+func setupFile(t *testing.T) io.ReadWriteSeeker {
 	t.Parallel()
 
-	f, err := ioutil.TempFile("", "dbstore")
-	if err != nil {
-		t.Fatalf("error creating temp dir: %v", err)
-	}
-
-	teardown := func() {
-		f.Close()
-		os.Remove(f.Name())
-	}
-
-	return f, teardown
+	return filebuffer.New(nil)
 }
 
 func TestSingleGet(t *testing.T) {
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	db := New(testdb)
 	key := "foo-key"
 	value := "foo-value"
@@ -46,8 +36,7 @@ func TestSingleGet(t *testing.T) {
 }
 
 func TestMultipleGet(t *testing.T) {
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	db := New(testdb)
 	key := "foo-key"
 	value := "foo-value"
@@ -78,8 +67,7 @@ func TestMultipleGet(t *testing.T) {
 
 func TestSingleDelete(t *testing.T) {
 	// prepare
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	db := New(testdb)
 	key := "foo-key"
 	value := "foo-value"
@@ -97,8 +85,7 @@ func TestSingleDelete(t *testing.T) {
 
 func TestSingleRecover(t *testing.T) {
 	// prepare
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	db := New(testdb)
 	key := "foo-key"
 	value := "foo-value"
@@ -128,8 +115,7 @@ func TestSingleRecover(t *testing.T) {
 
 func TestSingleRecoverWithDelete(t *testing.T) {
 	// prepare
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	db := New(testdb)
 	key := "foo-key"
 	value := "foo-value"
@@ -159,8 +145,7 @@ func TestSingleRecoverWithDelete(t *testing.T) {
 }
 
 func TestMultipleRecover(t *testing.T) {
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	db := New(testdb)
 
 	// first item

@@ -11,8 +11,7 @@ import (
 
 func TestSingleHttpDelete(t *testing.T) {
 	// setup
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	mydb := New(testdb)
 	service := NewService(mydb)
 	r := NewMainHandler(service)
@@ -49,8 +48,7 @@ func TestSingleHttpDelete(t *testing.T) {
 
 func TestSingleHttpSetAndGet(t *testing.T) {
 	// setup
-	testdb, teardown := setupFile(t)
-	defer teardown()
+	testdb := setupFile(t)
 	mydb := New(testdb)
 	service := NewService(mydb)
 	r := NewMainHandler(service)
