@@ -18,9 +18,6 @@ func main() {
 	fmt.Println("start app...")
 	handler := db.NewMainHandler(config.Filename)
 
-	// graceful shutdown
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 	srv := &http.Server{
 		Addr:    ":" + config.Port,
 		Handler: handler,
@@ -30,6 +27,10 @@ func main() {
 		log.Fatal(srv.ListenAndServe())
 	}()
 	fmt.Println("App started.")
+
+	// graceful shutdown
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 
 	killSignal := <-signals
 	switch killSignal {
