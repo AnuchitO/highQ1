@@ -60,3 +60,7 @@ PORT=8080 DB_FILENAME=${DB_FILE} ./app
 
 - [google protocol buffers](https://developers.google.com/protocol-buffers/)
 - [Designing Data-Intensive Applications](https://dataintensive.net)
+
+- [staticcheck](https://staticcheck.io/docs/getting-started/)
+
+- [gosec](https://github.com/securego/gosec)

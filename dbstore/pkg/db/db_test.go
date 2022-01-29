@@ -56,7 +56,7 @@ func TestMultipleGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error getting entity %v", err)
 	}
-	readEntity1, err := db.Get(key1)
+	readEntity1, _ := db.Get(key1)
 	if !reflect.DeepEqual(entity, readEntity) {
 		t.Fatalf("expected %v, got %v", entity, readEntity)
 	}
