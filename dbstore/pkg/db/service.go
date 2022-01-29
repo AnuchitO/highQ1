@@ -4,7 +4,7 @@ import "github.com/anuchito/dbstore/pb"
 
 // Service provides all database methods
 type Service struct {
-	Storage
+	Storage           Storage
 	SetRequestChannel chan *SetRequest
 }
 
