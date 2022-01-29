@@ -4,8 +4,16 @@ import "github.com/anuchito/dbstore/pb"
 
 // Service provides all database methods
 type Service struct {
-	db                *DB
+	db                Storage
 	SetRequestChannel chan *SetRequest
+}
+
+type Storage interface {
+	Set(entity *pb.Entity) error
+	Delete(key string) error
+	Get(key string) (*pb.Entity, error)
+	Recover() error
+	Len() int
 }
 
 // SetRequest is input for the worker non-buffered channel. Response will be
