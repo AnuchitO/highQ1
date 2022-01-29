@@ -15,9 +15,14 @@ import (
 // DB type
 type DB struct {
 	filename  string
-	fileWrite io.WriteSeeker
-	fileRead  io.ReadSeeker
+	f         io.ReadWriteSeeker
 	offsetMap map[string]int64
+}
+
+func New(f *os.File) *DB {
+	offsetMap := make(map[string]int64)
+	db := &DB{filename: f.Name(), f: f, offsetMap: offsetMap}
+	return db
 }
 
 func writeBinaryBufferLength(data []byte) *bytes.Buffer {
@@ -36,7 +41,7 @@ func (db *DB) pbAppend(entity *pb.Entity) (int64, error) {
 		return 0, fmt.Errorf("pb marshall error %v", err)
 	}
 	byteBuffer := writeBinaryBufferLength(entityBytes)
-	offset, err := db.fileWrite.Seek(0, 2)
+	offset, err := db.f.Seek(0, 2)
 	if err != nil {
 		return 0, fmt.Errorf("file seek error %v", err)
 	}
@@ -44,7 +49,7 @@ func (db *DB) pbAppend(entity *pb.Entity) (int64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error writing byte buffer %v", err)
 	}
-	_, err = db.fileWrite.Write(byteBuffer.Bytes())
+	_, err = db.f.Write(byteBuffer.Bytes())
 	if err != nil {
 		return 0, fmt.Errorf("entity size file write error %v", err)
 	}
@@ -81,7 +86,7 @@ func (db *DB) Get(key string) (*pb.Entity, error) {
 	if !ok {
 		return nil, nil
 	}
-	_, err := db.fileRead.Seek(offset, 0)
+	_, err := db.f.Seek(offset, 0)
 	if err != nil {
 		return nil, fmt.Errorf("file seek error %v", err)
 	}
@@ -102,7 +107,7 @@ func (db *DB) Get(key string) (*pb.Entity, error) {
 func (db *DB) readSize() (uint64, error) {
 	intsize := 8
 	byteBuffer := make([]byte, intsize)
-	_, err := db.fileRead.Read(byteBuffer)
+	_, err := db.f.Read(byteBuffer)
 	if err != nil {
 		return 0, err
 	}
@@ -119,7 +124,7 @@ func (db *DB) readSize() (uint64, error) {
 func (db *DB) Recover() error {
 	// start reading file at beginning
 	offset := int64(0)
-	_, err := db.fileRead.Seek(offset, 0)
+	_, err := db.f.Seek(offset, 0)
 	if err != nil {
 		return fmt.Errorf("file seek error %v", err)
 	}
@@ -147,7 +152,7 @@ func (db *DB) Recover() error {
 
 func (db *DB) readPbData(lengthOf uint64) (*pb.Entity, error) {
 	dataBuf := make([]byte, lengthOf)
-	_, err := db.fileRead.Read(dataBuf)
+	_, err := db.f.Read(dataBuf)
 	if err != nil {
 		return nil, err
 	}
@@ -163,15 +168,6 @@ func (db *DB) readPbData(lengthOf uint64) (*pb.Entity, error) {
 
 // NewDb return a new intialized Db
 func NewDb(filename string) *DB {
-	fileWrite, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatalf("error file opening for write")
-	}
-	fileRead, err := os.OpenFile(filename, os.O_RDONLY, 0644)
-	if err != nil {
-		log.Fatalf("error file opening for read")
-	}
-	offsetMap := make(map[string]int64)
-	db := &DB{filename: filename, fileWrite: fileWrite, fileRead: fileRead, offsetMap: offsetMap}
+	db := &DB{}
 	return db
 }
